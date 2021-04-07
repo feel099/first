@@ -1,0 +1,105 @@
+<?php
+//clearstatcache ( $clear_realpath_cache = true , $filename."_banner.png" );
+$filename = 'pic.png';
+$newwidth = 200;
+$newheight = 100;
+
+$size = getimagesize($filename); //Определяем размеры каринки
+//print_r($size);
+
+$width = $size[0];
+$height = $size[1]; //В переменные записываем ширину и высоту оригинала
+
+//Теперь определяем отношение ширины оригинала к ширина новой картинки 20000 / 200 = 100 = ош
+
+$width_ratio = $width / $newwidth;
+
+//Теперь определяем отношение высоты оригинала к высоте новой картинки 20000 / 100 = 200 = ов
+
+$height_ratio = $height / $newheight;
+
+//echo "<br>" . $width_ratio . "<br>";
+//echo $height_ratio . "<br>";
+
+/*Получаем размеры для уменьшенной картинки по большей стороне:
+
+Если ов > ош, тогда уменьшить обе стороны оригинала в ош раз 
+
+Иначе если ош > ов, тогда уменьшить обе стороны оригинала по в ов раз 
+
+Иначе уменьшить обе стороны оригинала в ош раз. 
+
+На выходе должны получить размеры уменьшенной каринку .
+*/
+
+if ($height_ratio > $width_ratio) {
+	$thumbnail_image_width = $width / $width_ratio;
+	$thumbnail_image_height = $height / $width_ratio;
+} elseif ($width_ratio > $height_ratio){
+	$thumbnail_image_width = $width / $height_ratio;
+	$thumbnail_image_height = $height / $height_ratio;
+} else {
+	$thumbnail_image_width = $width / $width_ratio;
+	$thumbnail_image_height = $height / $height_ratio;
+}
+
+//echo $thumbnail_image_width . "<br>";
+//echo $thumbnail_image_height . "<br>";
+
+//Нужно получить уменьшенную картинку с полученными для нее размерами
+// Создание нового полноцветного изображения
+$thumbnale_image = imagecreatetruecolor ( $thumbnail_image_width , $thumbnail_image_width );
+//Создаёт новое изображение из файла или URL
+$source = imagecreatefrompng($filename);
+// Копирование и изменение размера части изображения
+imagecopyresized ( $thumbnale_image , $source , 0 , 0 , 0 , 0 , $thumbnail_image_width , $thumbnail_image_height , $width , $height );
+
+// Вывод PNG изображения в браузер или файл - сохрранил в файле в той же папке
+$saved_thumbnail_image = imagepng($thumbnale_image, $filename."_prev.png");
+
+/*
+Получить координаты для обрезки прямоугольной области из картинки:
+
+Если ов > ош, тогда мы вычисляем начало обрезки по высоте, оно равно высоту уменьшенной каринки / 2 - высоту новой картинки / 2
+
+Если ош > ов, тогда мы вычисляем начало обрезки по ширине, оно равно ширину уменьшенной каринки / 2 - ширину новой картинки / 2
+
+Иначе мы вычисляем начало обрезки по обеим осям
+*/
+
+if ($height_ratio > $width_ratio) {
+	$x = 0;
+	$y =($thumbnail_image_height / 2)- ($newheight / 2);
+	
+} elseif ($width_ratio > $height_ratio) {
+	$x =($thumbnail_image_width / 2)- ($newwidth / 2);
+	$y = 0;
+
+} else {
+	$x =($thumbnail_image_width / 2)- ($newwidth / 2);
+	$y =($thumbnail_image_height / 2)- ($newheight / 2);
+}
+// Получили координаты для начала обрезки изображенияи вывели их
+//echo "<br>" . $x . "<br>" . $y . "<br>";
+
+
+$new_image_background = imagecreatetruecolor ( $newwidth , $newheight );
+$source1 = imagecreatefrompng($filename."_prev.png");
+
+$pruning = imagecrop($source1, ['x' => $x, 'y' => $y, 'width' => $newwidth, 'height' => $newheight]);
+
+
+if ($pruning !== FALSE) {
+    $new_image = imagepng($pruning, $filename."_banner.png");
+    imagedestroy($pruning);
+}
+
+unlink ( $filename."_prev.png");
+
+$path_to_image= $filename."_banner.png"; 
+?>
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<div style="text-align: center; margin-top: 100px;">
+	<img src="<?php echo $path_to_image; ?>">
+</div>
