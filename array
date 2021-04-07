@@ -1,0 +1,15 @@
+<?php
+
+$arr = [1, 1, 2, 3, 4, -51, 12, 12, 12, -51];
+
+$arr2 = [];
+foreach ($arr as $key => $value) {
+	$next_key = $key + 1;
+		//echo $arr[$key] . ', ' . $arr[$next_key] . "<br>";
+			if($arr[$key] == $arr[$next_key]){
+				array_push($arr2 , '(' . $key . ', ' . $next_key . ')' );
+			} else continue;
+}
+//print_r($arr);
+//print_r($arr2);
+echo count($arr2);
